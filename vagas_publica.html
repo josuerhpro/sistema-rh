@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trabalhe Conosco</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --navy: #0a1628; --teal: #14b8a6; --teal-light: #ccfbf1;
+      --gold: #f59e0b; --white: #ffffff;
+      --gray-50: #f8fafc; --gray-100: #f1f5f9; --gray-200: #e2e8f0;
+      --gray-400: #94a3b8; --gray-600: #475569; --gray-800: #1e293b;
+      --green: #10b981; --red: #ef4444;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--gray-50); color:var(--gray-800); min-height:100vh; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #0d2444 60%, #0f3060 100%);
+      padding: 60px 24px 80px; text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(20,184,166,0.15) 0%, transparent 60%);
+    }
+    .hero-brand { font-family:'Playfair Display',serif; font-size:32px; color:var(--white); margin-bottom:8px; position:relative; }
+    .hero-sub { font-size:11px; color:var(--teal); letter-spacing:3px; text-transform:uppercase; margin-bottom:28px; position:relative; }
+    .hero-title { font-size:44px; font-weight:700; color:var(--white); line-height:1.15; margin-bottom:16px; position:relative; }
+    .hero-title span { color:var(--teal); }
+    .hero-desc { font-size:16px; color:rgba(255,255,255,0.65); max-width:520px; margin:0 auto; line-height:1.7; position:relative; }
+
+    /* MAIN */
+    .container { max-width:880px; margin:0 auto; padding:0 20px 60px; }
+
+    /* SECTION TITLE */
+    .sec-title { font-size:22px; font-weight:700; color:var(--navy); margin:40px 0 20px; display:flex; align-items:center; gap:10px; }
+    .sec-pill { background:var(--teal); color:white; font-size:12px; padding:3px 10px; border-radius:20px; font-weight:600; }
+
+    /* VAGA CARD */
+    .vaga-card {
+      background:var(--white); border:1px solid var(--gray-200); border-radius:16px;
+      padding:26px 28px; margin-bottom:16px; cursor:pointer;
+      transition:all 0.2s; position:relative; overflow:hidden;
+    }
+    .vaga-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--teal); border-radius:4px 0 0 4px; }
+    .vaga-card:hover { box-shadow:0 8px 28px rgba(20,184,166,0.15); transform:translateY(-2px); border-color:var(--teal); }
+    .vaga-card.selected { border-color:var(--teal); background:#f0fdf9; box-shadow:0 8px 28px rgba(20,184,166,0.2); }
+    .vaga-titulo { font-size:18px; font-weight:700; color:var(--navy); margin-bottom:8px; }
+    .vaga-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+    .tag { display:inline-block; padding:3px 11px; border-radius:20px; font-size:12px; font-weight:600; }
+    .tag-dept { background:#dbeafe; color:#1e40af; }
+    .tag-contrato { background:var(--gray-100); color:var(--gray-600); }
+    .tag-sal { background:var(--teal-light); color:#0f766e; }
+    .vaga-desc { font-size:14px; color:var(--gray-600); line-height:1.6; margin-bottom:10px; }
+    .vaga-req { font-size:13px; color:var(--gray-400); }
+    .vaga-select-btn {
+      position:absolute; right:20px; top:50%; transform:translateY(-50%);
+      background:var(--teal); color:white; border:none; border-radius:8px;
+      padding:9px 18px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer;
+      transition:opacity 0.18s;
+    }
+    .vaga-select-btn:hover { opacity:0.88; }
+    .vaga-select-btn.selected { background:var(--green); }
+
+    /* FORM */
+    .form-card {
+      background:var(--white); border:1px solid var(--gray-200); border-radius:18px;
+      padding:36px; box-shadow:0 8px 32px rgba(10,22,40,0.07);
+    }
+    .form-title { font-size:20px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+    .form-sub { font-size:14px; color:var(--gray-400); margin-bottom:28px; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+    .form-group { display:flex; flex-direction:column; gap:6px; }
+    .form-group.full { grid-column:1/-1; }
+    .form-label { font-size:11px; font-weight:700; color:var(--gray-600); text-transform:uppercase; letter-spacing:0.6px; }
+    .form-control {
+      padding:12px 14px; border:1px solid var(--gray-200); border-radius:9px;
+      font-family:'DM Sans',sans-serif; font-size:15px; color:var(--gray-800);
+      outline:none; transition:border-color 0.18s; background:var(--white); width:100%;
+    }
+    .form-control:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(20,184,166,0.1); }
+    .form-hint { font-size:12px; color:var(--gray-400); margin-top:4px; line-height:1.5; }
+
+    /* VAGA SELECIONADA */
+    .vaga-sel-box {
+      background:var(--teal-light); border:1.5px solid var(--teal); border-radius:10px;
+      padding:14px 18px; margin-bottom:22px; display:flex; align-items:center; gap:12px;
+    }
+    .vaga-sel-box .icon { font-size:22px; }
+    .vaga-sel-nome { font-weight:700; color:#0f766e; font-size:15px; }
+    .vaga-sel-sub { font-size:12px; color:#0f766e; opacity:0.75; }
+    .change-vaga { background:none; border:none; color:var(--teal); font-size:13px; cursor:pointer; margin-left:auto; font-family:'DM Sans',sans-serif; text-decoration:underline; }
+
+    /* STEP INDICATOR */
+    .steps { display:flex; justify-content:center; gap:0; margin:32px 0 36px; }
+    .step { display:flex; align-items:center; gap:0; }
+    .step-circle {
+      width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+      font-size:14px; font-weight:700; border:2px solid var(--gray-200); background:var(--white); color:var(--gray-400);
+      transition:all 0.2s;
+    }
+    .step-circle.active { background:var(--teal); color:white; border-color:var(--teal); }
+    .step-circle.done { background:var(--green); color:white; border-color:var(--green); }
+    .step-label { font-size:12px; color:var(--gray-400); margin-top:6px; text-align:center; }
+    .step-line { width:60px; height:2px; background:var(--gray-200); margin:0 4px; margin-top:-20px; transition:background 0.2s; }
+    .step-line.done { background:var(--green); }
+    .step-wrap { display:flex; flex-direction:column; align-items:center; }
+
+    /* BUTTONS */
+    .btn {
+      padding:14px 28px; border-radius:10px; border:none; cursor:pointer;
+      font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600;
+      transition:all 0.18s; display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn-primary { background:var(--teal); color:white; }
+    .btn-primary:hover { background:#0f9689; }
+    .btn-secondary { background:var(--gray-100); color:var(--gray-600); }
+    .btn-secondary:hover { background:var(--gray-200); }
+    .btn-lg { padding:16px 36px; font-size:16px; width:100%; justify-content:center; margin-top:8px; }
+
+    /* SUCCESS */
+    .success-card {
+      background:var(--white); border-radius:18px; padding:60px 40px; text-align:center;
+      box-shadow:0 8px 32px rgba(10,22,40,0.07); border:1px solid var(--gray-200);
+    }
+    .success-icon { font-size:64px; margin-bottom:20px; }
+    .success-title { font-size:28px; font-weight:700; color:var(--navy); margin-bottom:12px; }
+    .success-sub { font-size:16px; color:var(--gray-400); line-height:1.6; max-width:440px; margin:0 auto 28px; }
+    .btn-novo { background:var(--gray-100); color:var(--gray-600); border:none; padding:12px 24px; border-radius:9px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; }
+
+    /* ALERT */
+    .alert { padding:14px 18px; border-radius:9px; font-size:14px; margin-top:16px; }
+    .alert-error { background:#fee2e2; color:#991b1b; }
+
+    /* EMPTY */
+    .empty { text-align:center; padding:56px 20px; color:var(--gray-400); }
+    .empty .ei { font-size:48px; margin-bottom:16px; }
+    .loading { text-align:center; padding:40px; color:var(--gray-400); }
+
+    /* UPLOAD BOX */
+    .upload-box {
+      border: 2px dashed var(--gray-200); border-radius: 12px;
+      padding: 32px 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; background: var(--gray-50);
+    }
+    .upload-box:hover, .upload-box.dragover { border-color: var(--teal); background: var(--teal-light); }
+    .upload-box.has-file { border-color: var(--green); border-style: solid; background: #f0fdf4; }
+
+    /* FOOTER */
+    .footer { text-align:center; padding:30px; color:var(--gray-400); font-size:13px; border-top:1px solid var(--gray-100); margin-top:40px; }
+
+    @media(max-width:640px){
+      .hero-title { font-size:30px; }
+      .form-grid { grid-template-columns:1fr; }
+      .vaga-select-btn { position:static; transform:none; display:block; width:100%; margin-top:14px; }
+      .vaga-card { padding-bottom:16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-brand" id="empresa-nome">RH Pro</div>
+  <div class="hero-sub">Trabalhe Conosco</div>
+  <h1 class="hero-title">Faça parte do nosso <span>time</span></h1>
+  <p class="hero-desc">Veja as vagas abertas abaixo, candidate-se e envie seu currículo. Entraremos em contato em breve!</p>
+</div>
+
+<!-- STEPS -->
+<div class="container">
+  <div class="steps">
+    <div class="step-wrap">
+      <div class="step-circle active" id="step1-circle">1</div>
+      <div class="step-label">Escolha a vaga</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-top:0;padding-bottom:26px">
+      <div class="step-line" id="line1"></div>
+    </div>
+    <div class="step-wrap">
+      <div class="step-circle" id="step2-circle">2</div>
+      <div class="step-label">Seus dados</div>
+    </div>
+    <div style="display:flex;align-items:center;margin-top:0;padding-bottom:26px">
+      <div class="step-line" id="line2"></div>
+    </div>
+    <div class="step-wrap">
+      <div class="step-circle" id="step3-circle">✓</div>
+      <div class="step-label">Confirmação</div>
+    </div>
+  </div>
+
+  <!-- STEP 1: VAGAS -->
+  <div id="section-vagas">
+    <div class="sec-title">
+      📋 Vagas abertas
+      <span class="sec-pill" id="vagas-count">...</span>
+    </div>
+    <div id="vagas-list"><div class="loading">Carregando vagas...</div></div>
+  </div>
+
+  <!-- STEP 2: FORMULÁRIO -->
+  <div id="section-form" style="display:none">
+    <div class="form-card">
+      <div class="form-title">✍️ Preencha seus dados</div>
+      <div class="form-sub">Campos com * são obrigatórios. Leva menos de 2 minutos!</div>
+
+      <div class="vaga-sel-box" id="vaga-sel-display">
+        <div class="icon">📋</div>
+        <div>
+          <div class="vaga-sel-nome" id="vaga-sel-nome">—</div>
+          <div class="vaga-sel-sub" id="vaga-sel-dept">—</div>
+        </div>
+        <button class="change-vaga" onclick="voltarVagas()">← Trocar vaga</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Nome completo *</label>
+          <input class="form-control" id="f-nome" placeholder="Seu nome completo" maxlength="120">
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input class="form-control" type="email" id="f-email" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp / Telefone *</label>
+          <input class="form-control" id="f-tel" placeholder="(00) 00000-0000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF</label>
+          <input class="form-control" id="f-cpf" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data de nascimento</label>
+          <input class="form-control" type="date" id="f-nasc">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">LinkedIn ou portfólio (opcional)</label>
+          <input class="form-control" id="f-linkedin" placeholder="https://linkedin.com/in/...">
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label">📎 Currículo (PDF ou Word) *</label>
+          <div class="upload-box" id="upload-box" onclick="document.getElementById('f-curriculo-file').click()" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropFile(event)">
+            <div id="upload-placeholder">
+              <div style="font-size:40px;margin-bottom:10px">📄</div>
+              <div style="font-weight:600;color:var(--navy);font-size:15px">Clique para selecionar ou arraste aqui</div>
+              <div style="font-size:13px;color:var(--gray-400);margin-top:6px">Aceito: PDF e Word (.docx) — máximo 5 MB</div>
+            </div>
+            <div id="upload-preview" style="display:none">
+              <div style="font-size:36px" id="upload-icon">📄</div>
+              <div style="font-weight:600;color:var(--green);font-size:15px" id="upload-filename">arquivo.pdf</div>
+              <div style="font-size:12px;color:var(--gray-400);margin-top:4px" id="upload-size"></div>
+              <button onclick="event.stopPropagation();removerArquivo()" style="background:none;border:none;color:var(--red);font-size:12px;cursor:pointer;margin-top:8px;font-family:inherit">✕ Remover</button>
+            </div>
+          </div>
+          <input type="file" id="f-curriculo-file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none" onchange="arquivoSelecionado(this)">
+          <!-- Barra de progresso -->
+          <div id="upload-progress-wrap" style="display:none;margin-top:10px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--gray-400);margin-bottom:4px">
+              <span>Enviando currículo...</span><span id="upload-pct">0%</span>
+            </div>
+            <div style="background:var(--gray-100);border-radius:20px;height:8px;overflow:hidden">
+              <div id="upload-bar" style="height:100%;width:0%;background:var(--teal);border-radius:20px;transition:width 0.3s"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label class="form-label">Mensagem / Apresentação (opcional)</label>
+          <textarea class="form-control" id="f-msg" rows="3" placeholder="Conte um pouco sobre você, sua experiência ou por que quer trabalhar conosco..."></textarea>
+        </div>
+      </div>
+
+      <div id="form-alert"></div>
+      <button class="btn btn-primary btn-lg" onclick="submitForm()">
+        📤 Enviar candidatura
+      </button>
+      <div style="text-align:center;margin-top:14px">
+        <button class="btn btn-secondary" onclick="voltarVagas()" style="padding:10px 20px;font-size:13px">← Voltar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: SUCESSO -->
+  <div id="section-success" style="display:none">
+    <div class="success-card">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Candidatura enviada!</div>
+      <div class="success-sub">Recebemos seus dados e currículo. Nossa equipe de RH vai analisar e entrar em contato pelo WhatsApp ou e-mail em breve.</div>
+      <div style="background:var(--teal-light);border-radius:10px;padding:16px 20px;margin-bottom:24px;font-size:14px;color:#0f766e">
+        <strong>✅ Dicas enquanto aguarda:</strong><br>
+        Fique de olho no seu WhatsApp e e-mail.<br>
+        Mantenha seu currículo atualizado.
+      </div>
+      <button class="btn-novo" onclick="novaCandidatura()">📋 Candidatar para outra vaga</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Powered by <strong>RH Pro</strong> — Sistema de Recursos Humanos
+</div>
+
+<script>
+const SB_URL = 'https://souaquyulitejpdzlifx.supabase.co';
+const SB_KEY = 'sb_publishable_JgX7NZR80M3oBrIhpzzeTQ_imNYERm3';
+const BUCKET  = 'curriculos';
+
+let vagasSelecionada  = null;
+let vagasDisponiveis  = [];
+let arquivoSelecionadoObj = null;
+
+// ── API helpers ──
+async function sbGet(table, qs='') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}${qs}`, {
+    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+  });
+  return r.ok ? r.json() : [];
+}
+
+async function sbPost(table, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method:'POST',
+    headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type':'application/json', 'Prefer':'return=representation' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json().catch(()=>{}); throw new Error(e?.message||'Erro ao salvar'); }
+  return r.json();
+}
+
+// ── Upload para Supabase Storage ──
+async function uploadCurriculo(file, nomeCandidate) {
+  const ext   = file.name.split('.').pop().toLowerCase();
+  const safe  = nomeCandidate.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30);
+  const ts    = Date.now();
+  const path  = `${safe}_${ts}.${ext}`;
+
+  const mimeMap = {
+    pdf:  'application/pdf',
+    doc:  'application/msword',
+    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  };
+  const mime = mimeMap[ext] || 'application/octet-stream';
+
+  setProgress(20);
+
+  const uploadUrl = `${SB_URL}/storage/v1/object/${BUCKET}/${path}`;
+
+  let r;
+  try {
+    r = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'apikey':        SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type':  mime,
+        'x-upsert':      'true'
+      },
+      body: file
+    });
+  } catch(netErr) {
+    throw new Error('Sem conexão com o servidor de arquivos. Verifique sua internet e tente novamente.');
+  }
+
+  setProgress(85);
+
+  if (!r.ok) {
+    let errMsg = `Erro ${r.status}`;
+    try {
+      const e = await r.json();
+      errMsg = e?.message || e?.error || e?.statusCode || errMsg;
+    } catch(_){}
+
+    // Diagnóstico amigável
+    if (r.status === 400) errMsg = 'Bucket "curriculos" não encontrado ou sem permissão. Execute o SQL de configuração no Supabase.';
+    if (r.status === 403) errMsg = 'Sem permissão para fazer upload. Execute o SQL de configuração no Supabase (⚙️ Configuração BD).';
+    if (r.status === 404) errMsg = 'Bucket "curriculos" não existe. Execute o SQL de configuração.';
+    if (r.status === 413) errMsg = 'Arquivo muito grande. Máximo permitido: 5 MB.';
+
+    throw new Error(errMsg);
+  }
+
+  setProgress(100);
+  return `${SB_URL}/storage/v1/object/public/${BUCKET}/${path}`;
+}
+
+function setProgress(pct) {
+  document.getElementById('upload-bar').style.width = pct + '%';
+  document.getElementById('upload-pct').textContent = pct + '%';
+}
+
+// ── Drag & Drop ──
+function dragOver(e) { e.preventDefault(); document.getElementById('upload-box').classList.add('dragover'); }
+function dragLeave()  { document.getElementById('upload-box').classList.remove('dragover'); }
+function dropFile(e) {
+  e.preventDefault();
+  dragLeave();
+  const file = e.dataTransfer.files[0];
+  if (file) processarArquivo(file);
+}
+
+function arquivoSelecionado(input) {
+  if (input.files[0]) processarArquivo(input.files[0]);
+}
+
+function processarArquivo(file) {
+  const allowed = ['pdf','doc','docx'];
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!allowed.includes(ext)) { alert('❌ Formato não permitido. Use PDF ou Word (.docx)'); return; }
+  if (file.size > 5 * 1024 * 1024) { alert('❌ Arquivo muito grande. Máximo: 5 MB'); return; }
+
+  arquivoSelecionadoObj = file;
+  const box = document.getElementById('upload-box');
+  box.classList.add('has-file');
+  box.classList.remove('dragover');
+
+  const icon = ext === 'pdf' ? '📕' : '📘';
+  document.getElementById('upload-icon').textContent = icon;
+  document.getElementById('upload-filename').textContent = file.name;
+  document.getElementById('upload-size').textContent = (file.size/1024).toFixed(0) + ' KB';
+  document.getElementById('upload-placeholder').style.display = 'none';
+  document.getElementById('upload-preview').style.display = '';
+}
+
+function removerArquivo() {
+  arquivoSelecionadoObj = null;
+  document.getElementById('f-curriculo-file').value = '';
+  document.getElementById('upload-box').classList.remove('has-file');
+  document.getElementById('upload-placeholder').style.display = '';
+  document.getElementById('upload-preview').style.display = 'none';
+}
+
+// ── Init & vagas ──
+async function init() {
+  vagasDisponiveis = await sbGet('rh_vagas','?status=eq.aberta&order=created_at.desc') || [];
+  document.getElementById('vagas-count').textContent = vagasDisponiveis.length;
+
+  const el = document.getElementById('vagas-list');
+  if (!vagasDisponiveis.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">🔍</div><p>Nenhuma vaga aberta no momento.<br>Volte em breve!</p></div>`;
+    return;
+  }
+
+  el.innerHTML = vagasDisponiveis.map(v => {
+    const salStr = v.salario_min||v.salario_max
+      ? `💰 R$ ${Number(v.salario_min||0).toLocaleString('pt-BR')} – ${Number(v.salario_max||0).toLocaleString('pt-BR')}`
+      : '';
+    return `<div class="vaga-card" id="card-${v.id}" onclick="selecionarVaga('${v.id}')">
+      <div class="vaga-titulo">${v.titulo}</div>
+      <div class="vaga-tags">
+        ${v.departamento ? `<span class="tag tag-dept">📂 ${v.departamento}</span>` : ''}
+        ${v.tipo_contrato ? `<span class="tag tag-contrato">${v.tipo_contrato}</span>` : ''}
+        ${salStr ? `<span class="tag tag-sal">${salStr}</span>` : ''}
+      </div>
+      ${v.descricao ? `<div class="vaga-desc">${v.descricao}</div>` : ''}
+      ${v.requisitos ? `<div class="vaga-req">📌 <strong>Requisitos:</strong> ${v.requisitos}</div>` : ''}
+      <button class="vaga-select-btn" id="btn-${v.id}" onclick="event.stopPropagation();selecionarVaga('${v.id}')">Candidatar-se →</button>
+    </div>`;
+  }).join('');
+}
+
+function selecionarVaga(id) {
+  vagasSelecionada = vagasDisponiveis.find(v=>v.id===id);
+  if (!vagasSelecionada) return;
+  document.getElementById('step1-circle').classList.remove('active');
+  document.getElementById('step1-circle').classList.add('done');
+  document.getElementById('step1-circle').textContent = '✓';
+  document.getElementById('line1').classList.add('done');
+  document.getElementById('step2-circle').classList.add('active');
+  document.getElementById('vaga-sel-nome').textContent = vagasSelecionada.titulo;
+  document.getElementById('vaga-sel-dept').textContent = [vagasSelecionada.departamento, vagasSelecionada.tipo_contrato].filter(Boolean).join(' • ') || 'Vaga aberta';
+  document.getElementById('section-vagas').style.display = 'none';
+  document.getElementById('section-form').style.display  = '';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function voltarVagas() {
+  vagasSelecionada = null; arquivoSelecionadoObj = null;
+  document.getElementById('step1-circle').classList.add('active');
+  document.getElementById('step1-circle').classList.remove('done');
+  document.getElementById('step1-circle').textContent = '1';
+  document.getElementById('line1').classList.remove('done');
+  document.getElementById('step2-circle').classList.remove('active');
+  document.getElementById('section-form').style.display  = 'none';
+  document.getElementById('section-vagas').style.display = '';
+  document.getElementById('form-alert').innerHTML = '';
+  removerArquivo();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+async function submitForm() {
+  const nome  = document.getElementById('f-nome').value.trim();
+  const tel   = document.getElementById('f-tel').value.trim();
+  if (!nome) { showErr('Nome é obrigatório'); return; }
+  if (!tel)  { showErr('WhatsApp / Telefone é obrigatório'); return; }
+  if (!arquivoSelecionadoObj) { showErr('Anexe seu currículo em PDF ou Word antes de enviar'); return; }
+
+  const btn = document.querySelector('.btn-primary.btn-lg');
+  btn.innerHTML = '⏳ Enviando...'; btn.disabled = true;
+  document.getElementById('upload-progress-wrap').style.display = '';
+  setProgress(0);
+
+  try {
+    // 1. Upload do arquivo
+    const curriculoUrl = await uploadCurriculo(arquivoSelecionadoObj, nome);
+
+    // 2. Salvar candidato
+    await sbPost('rh_candidatos', {
+      vaga_id:         vagasSelecionada?.id || null,
+      nome,
+      email:           document.getElementById('f-email').value.trim() || null,
+      telefone:        tel,
+      cpf:             document.getElementById('f-cpf').value.trim() || null,
+      data_nascimento: document.getElementById('f-nasc').value || null,
+      linkedin:        document.getElementById('f-linkedin').value.trim() || null,
+      curriculo_url:   curriculoUrl,
+      observacoes:     document.getElementById('f-msg').value.trim() || null,
+      etapa:           'inscrito',
+      data_inscricao:  new Date().toISOString().slice(0,10)
+    });
+
+    // Sucesso
+    document.getElementById('upload-progress-wrap').style.display = 'none';
+    document.getElementById('step2-circle').classList.remove('active');
+    document.getElementById('step2-circle').classList.add('done');
+    document.getElementById('step2-circle').textContent = '✓';
+    document.getElementById('line2').classList.add('done');
+    document.getElementById('step3-circle').classList.add('done');
+    document.getElementById('section-form').style.display    = 'none';
+    document.getElementById('section-success').style.display = '';
+    window.scrollTo({ top:0, behavior:'smooth' });
+
+  } catch(e) {
+    showErr('Erro ao enviar: ' + e.message);
+    btn.innerHTML = '📤 Enviar candidatura'; btn.disabled = false;
+    document.getElementById('upload-progress-wrap').style.display = 'none';
+  }
+}
+
+function novaCandidatura() {
+  ['f-nome','f-email','f-tel','f-cpf','f-linkedin','f-msg'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-nasc').value='';
+  document.getElementById('form-alert').innerHTML='';
+  removerArquivo();
+  vagasSelecionada = null;
+  ['step1-circle','step2-circle','step3-circle'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.className='step-circle'; el.textContent=i===2?'✓':i+1;
+  });
+  document.getElementById('step1-circle').classList.add('active');
+  document.getElementById('step1-circle').textContent='1';
+  document.getElementById('line1').classList.remove('done');
+  document.getElementById('line2').classList.remove('done');
+  document.getElementById('section-success').style.display = 'none';
+  document.getElementById('section-vagas').style.display   = '';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function showErr(msg) {
+  document.getElementById('form-alert').innerHTML = `<div class="alert alert-error">⚠️ ${msg}</div>`;
+  document.getElementById('form-alert').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+init();
+</script>
+</body>
+</html>

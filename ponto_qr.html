@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Ponto Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0a1628; --teal:#14b8a6; --green:#10b981; --red:#ef4444; --gold:#f59e0b; --gray-100:#f1f5f9; --gray-400:#94a3b8; --white:#ffffff; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:linear-gradient(135deg,var(--navy) 0%,#0d2444 100%); min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; }
+
+    .card { background:white; border-radius:24px; padding:36px 28px; width:100%; max-width:380px; text-align:center; box-shadow:0 40px 80px rgba(0,0,0,0.4); }
+
+    /* Loading */
+    .loading { color:var(--gray-400); font-size:15px; padding:40px 0; }
+    .spinner { width:48px; height:48px; border:4px solid var(--gray-100); border-top-color:var(--teal); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 20px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* Avatar */
+    .avatar { width:80px; height:80px; border-radius:50%; background:var(--navy); color:white; display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:700; margin:0 auto 16px; }
+    .emp-nome { font-size:22px; font-weight:700; color:var(--navy); margin-bottom:4px; }
+    .emp-cargo { font-size:14px; color:var(--gray-400); margin-bottom:24px; }
+
+    /* Relógio */
+    .clock { font-size:48px; font-weight:700; color:var(--navy); letter-spacing:2px; font-variant-numeric:tabular-nums; margin-bottom:6px; }
+    .clock-date { font-size:14px; color:var(--gray-400); margin-bottom:28px; }
+
+    /* Último ponto */
+    .ultimo-ponto { background:var(--gray-100); border-radius:12px; padding:12px 16px; margin-bottom:24px; font-size:13.5px; color:#475569; }
+    .ultimo-ponto strong { color:var(--navy); }
+
+    /* Botões de tipo */
+    .tipos-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+    .tipo-btn { padding:14px 10px; border-radius:12px; border:2px solid var(--gray-100); background:white; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; color:#475569; transition:all 0.18s; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .tipo-btn:hover { border-color:var(--teal); color:var(--teal); }
+    .tipo-btn.selected { border-color:var(--teal); background:#f0fdf9; color:var(--teal); }
+    .tipo-btn .emoji { font-size:22px; }
+
+    /* Obs */
+    .obs-input { width:100%; padding:12px 14px; border:1px solid var(--gray-100); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--navy); outline:none; margin-bottom:16px; }
+    .obs-input:focus { border-color:var(--teal); }
+
+    /* Registrar btn */
+    .btn-registrar { width:100%; padding:16px; background:var(--teal); color:white; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:16px; font-weight:700; cursor:pointer; transition:opacity 0.18s; letter-spacing:0.5px; }
+    .btn-registrar:hover { opacity:0.9; }
+    .btn-registrar:disabled { opacity:0.5; cursor:not-allowed; }
+
+    /* Sucesso */
+    .success { display:none; flex-direction:column; align-items:center; gap:12px; padding:20px 0; }
+    .success-icon { font-size:72px; animation:popIn 0.4s ease; }
+    @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+    .success-title { font-size:22px; font-weight:700; color:var(--navy); }
+    .success-sub { font-size:14px; color:var(--gray-400); }
+    .success-badge { padding:10px 20px; border-radius:20px; font-size:15px; font-weight:700; }
+    .btn-novo { margin-top:10px; background:var(--gray-100); color:#475569; border:none; padding:12px 24px; border-radius:10px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; }
+
+    /* Erro */
+    .erro { display:none; flex-direction:column; align-items:center; gap:12px; padding:20px 0; }
+    .erro-icon { font-size:60px; }
+    .erro-msg { font-size:15px; color:var(--red); font-weight:600; }
+    .erro-sub { font-size:13px; color:var(--gray-400); text-align:center; }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- LOADING -->
+  <div id="sec-loading">
+    <div class="spinner"></div>
+    <div class="loading">Identificando colaborador...</div>
+  </div>
+
+  <!-- FORMULÁRIO -->
+  <div id="sec-form" style="display:none">
+    <div class="avatar" id="emp-avatar">?</div>
+    <div class="emp-nome" id="emp-nome">—</div>
+    <div class="emp-cargo" id="emp-cargo">—</div>
+
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="clock-date" id="clock-date">—</div>
+
+    <div class="ultimo-ponto" id="ultimo-ponto" style="display:none">
+      ⏱️ Último registro: <strong id="ult-tipo">—</strong> às <strong id="ult-hora">—</strong>
+    </div>
+
+    <div class="tipos-grid">
+      <button class="tipo-btn selected" id="btn-entrada" onclick="selecionarTipo('entrada')"><span class="emoji">🟢</span>Entrada</button>
+      <button class="tipo-btn" id="btn-saida" onclick="selecionarTipo('saida')"><span class="emoji">🔴</span>Saída</button>
+      <button class="tipo-btn" id="btn-saida_almoco" onclick="selecionarTipo('saida_almoco')"><span class="emoji">🍽️</span>Saída almoço</button>
+      <button class="tipo-btn" id="btn-retorno_almoco" onclick="selecionarTipo('retorno_almoco')"><span class="emoji">↩️</span>Retorno almoço</button>
+    </div>
+
+    <input class="obs-input" id="obs" placeholder="Observação (opcional)" maxlength="100">
+    <button class="btn-registrar" id="btn-reg" onclick="registrar()">✔ Registrar ponto</button>
+  </div>
+
+  <!-- SUCESSO -->
+  <div id="sec-sucesso" class="success">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Ponto registrado!</div>
+    <div class="success-badge" id="suc-badge">—</div>
+    <div class="success-sub" id="suc-hora">—</div>
+    <button class="btn-novo" onclick="voltarForm()">Registrar outro</button>
+  </div>
+
+  <!-- ERRO -->
+  <div id="sec-erro" class="erro">
+    <div class="erro-icon">❌</div>
+    <div class="erro-msg" id="err-msg">Colaborador não encontrado</div>
+    <div class="erro-sub">Verifique se o QR Code está correto ou solicite um novo ao RH.</div>
+  </div>
+
+</div>
+
+<script>
+const SB_URL = 'https://souaquyulitejpdzlifx.supabase.co';
+const SB_KEY = 'sb_publishable_JgX7NZR80M3oBrIhpzzeTQ_imNYERm3';
+
+let colabId   = null;
+let tipoSel   = 'entrada';
+let clockTimer = null;
+
+const tipoLabel = { entrada:'🟢 Entrada', saida:'🔴 Saída', saida_almoco:'🍽️ Saída para almoço', retorno_almoco:'↩️ Retorno do almoço' };
+const tipoCor   = { entrada:'#d1fae5', saida:'#fee2e2', saida_almoco:'#fef3c7', retorno_almoco:'#d1fae5' };
+const tipoText  = { entrada:'#065f46', saida:'#991b1b', saida_almoco:'#92400e', retorno_almoco:'#065f46' };
+
+async function sbGet(table, qs) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}${qs}`, {
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` }
+  });
+  return r.ok ? r.json() : [];
+}
+
+async function sbPost(table, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json().catch(()=>{}); throw new Error(e?.message || 'Erro ao salvar'); }
+  return r.json();
+}
+
+function tick() {
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleTimeString('pt-BR');
+  document.getElementById('clock-date').textContent = now.toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long' });
+}
+
+function selecionarTipo(tipo) {
+  tipoSel = tipo;
+  ['entrada','saida','saida_almoco','retorno_almoco'].forEach(t => {
+    document.getElementById('btn-'+t).classList.toggle('selected', t === tipo);
+  });
+}
+
+async function detectarUltimoTipo() {
+  const hoje = new Date().toISOString().slice(0,10);
+  const rec = await sbGet('rh_ponto', `?colaborador_id=eq.${colabId}&data_hora=gte.${hoje}T00:00:00&order=data_hora.desc&limit=1`);
+  if (rec?.length) {
+    const ult = rec[0];
+    const hora = new Date(ult.data_hora).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('ult-tipo').textContent = tipoLabel[ult.tipo] || ult.tipo;
+    document.getElementById('ult-hora').textContent = hora;
+    document.getElementById('ultimo-ponto').style.display = '';
+    // Sugerir próximo tipo
+    const proximo = { entrada:'saida_almoco', saida_almoco:'retorno_almoco', retorno_almoco:'saida', saida:'entrada' };
+    selecionarTipo(proximo[ult.tipo] || 'entrada');
+  }
+}
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  colabId = params.get('id');
+  if (!colabId) { showErro('QR Code inválido — ID não encontrado'); return; }
+
+  try {
+    const res = await sbGet('rh_colaboradores', `?id=eq.${colabId}&select=id,nome,cargo,departamento,status`);
+    const c = res?.[0];
+    if (!c) { showErro('Colaborador não encontrado no sistema'); return; }
+    if (c.status === 'inativo') { showErro(`${c.nome} está inativo. Consulte o RH.`); return; }
+
+    document.getElementById('emp-avatar').textContent = c.nome.charAt(0).toUpperCase();
+    document.getElementById('emp-nome').textContent = c.nome;
+    document.getElementById('emp-cargo').textContent = [c.cargo, c.departamento].filter(Boolean).join(' • ') || 'Colaborador';
+
+    document.getElementById('sec-loading').style.display = 'none';
+    document.getElementById('sec-form').style.display = '';
+
+    tick(); clockTimer = setInterval(tick, 1000);
+    await detectarUltimoTipo();
+  } catch(e) {
+    showErro('Erro de conexão: ' + e.message);
+  }
+}
+
+async function registrar() {
+  const btn = document.getElementById('btn-reg');
+  btn.disabled = true; btn.textContent = '⏳ Registrando...';
+  try {
+    await sbPost('rh_ponto', {
+      colaborador_id: colabId,
+      tipo: tipoSel,
+      data_hora: new Date().toISOString(),
+      observacao: document.getElementById('obs').value.trim() || null
+    });
+    clearInterval(clockTimer);
+    const hora = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('suc-badge').textContent = tipoLabel[tipoSel];
+    document.getElementById('suc-badge').style.cssText = `background:${tipoCor[tipoSel]};color:${tipoText[tipoSel]};padding:10px 20px;border-radius:20px;font-size:15px;font-weight:700`;
+    document.getElementById('suc-hora').textContent = 'Registrado às ' + hora;
+    document.getElementById('sec-form').style.display = 'none';
+    document.getElementById('sec-sucesso').style.display = 'flex';
+    setTimeout(() => window.close(), 5000);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '✔ Registrar ponto';
+    alert('Erro ao registrar: ' + e.message);
+  }
+}
+
+function voltarForm() {
+  document.getElementById('sec-sucesso').style.display = 'none';
+  document.getElementById('sec-form').style.display = '';
+  document.getElementById('obs').value = '';
+  tick(); clockTimer = setInterval(tick, 1000);
+  detectarUltimoTipo();
+}
+
+function showErro(msg) {
+  document.getElementById('sec-loading').style.display = 'none';
+  document.getElementById('err-msg').textContent = msg;
+  document.getElementById('sec-erro').style.display = 'flex';
+}
+
+init();
+</script>
+</body>
+</html>

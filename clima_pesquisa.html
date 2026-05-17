@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Pesquisa de Clima</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --navy:#0a1628; --teal:#14b8a6; --green:#10b981; --gold:#f59e0b; --red:#ef4444; --white:#fff; --gray-50:#f8fafc; --gray-100:#f1f5f9; --gray-200:#e2e8f0; --gray-400:#94a3b8; --gray-600:#475569; }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'DM Sans',sans-serif; background:var(--gray-50); min-height:100vh; }
+    .hero { background:linear-gradient(135deg,var(--navy),#0d2444); padding:40px 24px 60px; text-align:center; }
+    .hero-title { font-size:26px; font-weight:700; color:white; margin-bottom:8px; }
+    .hero-sub { font-size:14px; color:rgba(255,255,255,0.6); }
+    .anon-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(20,184,166,0.2); color:#5eead4; border-radius:20px; padding:6px 14px; font-size:12px; font-weight:600; margin-top:14px; }
+    .container { max-width:600px; margin:0 auto; padding:0 16px 60px; }
+    .card { background:white; border-radius:16px; border:1px solid var(--gray-200); margin-top:20px; overflow:hidden; }
+    .card-header { padding:18px 22px; border-bottom:1px solid var(--gray-100); font-size:15px; font-weight:700; color:var(--navy); }
+    .card-body { padding:22px; }
+    .pergunta { margin-bottom:24px; }
+    .pergunta-label { font-size:14px; font-weight:600; color:var(--navy); margin-bottom:12px; display:block; }
+    .pergunta-sub { font-size:12px; color:var(--gray-400); margin-bottom:12px; display:block; }
+    .estrelas { display:flex; gap:8px; }
+    .estrela-btn { width:48px; height:48px; border-radius:10px; border:2px solid var(--gray-200); background:white; cursor:pointer; font-size:22px; transition:all 0.15s; display:flex; align-items:center; justify-content:center; }
+    .estrela-btn:hover { border-color:var(--gold); transform:scale(1.1); }
+    .estrela-label { font-size:11px; color:var(--gray-400); margin-top:6px; }
+    .nota-labels { display:flex; justify-content:space-between; font-size:11px; color:var(--gray-400); margin-top:6px; }
+    textarea, input[type=text] { width:100%; padding:12px 14px; border:1px solid var(--gray-200); border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; resize:vertical; outline:none; transition:border-color 0.18s; }
+    textarea:focus, input[type=text]:focus { border-color:var(--teal); }
+    .btn-enviar { width:100%; padding:16px; background:var(--teal); color:white; border:none; border-radius:12px; font-family:'DM Sans',sans-serif; font-size:16px; font-weight:700; cursor:pointer; margin-top:8px; transition:opacity 0.18s; }
+    .btn-enviar:hover { opacity:0.9; }
+    .btn-enviar:disabled { opacity:0.5; cursor:not-allowed; }
+    .alert { padding:12px 16px; border-radius:8px; font-size:13.5px; margin-top:12px; }
+    .alert-error { background:#fee2e2; color:#991b1b; }
+    .sucesso { display:none; text-align:center; padding:60px 24px; }
+    .sucesso-icon { font-size:72px; margin-bottom:20px; animation:popIn 0.4s ease; }
+    @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+    .sucesso-title { font-size:24px; font-weight:700; color:var(--navy); margin-bottom:10px; }
+    .sucesso-sub { font-size:15px; color:var(--gray-400); }
+    .loading { text-align:center; padding:60px 24px; color:var(--gray-400); }
+    .spinner { width:44px; height:44px; border:4px solid var(--gray-100); border-top-color:var(--teal); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 16px; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .erro-page { text-align:center; padding:60px 24px; }
+    .progress-bar { height:4px; background:var(--gray-100); border-radius:2px; margin-bottom:24px; }
+    .progress-fill { height:100%; background:var(--teal); border-radius:2px; transition:width 0.3s; }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div id="hero-empresa" style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:8px"></div>
+  <div class="hero-title" id="hero-titulo">Pesquisa de Clima Organizacional</div>
+  <div class="hero-sub" id="hero-desc">Avalie seu ambiente de trabalho</div>
+  <div class="anon-badge">🔒 100% anônima — ninguém saberá quem respondeu</div>
+</div>
+
+<div class="container">
+
+  <!-- Loading -->
+  <div id="sec-loading" class="card">
+    <div class="loading"><div class="spinner"></div>Carregando pesquisa...</div>
+  </div>
+
+  <!-- Formulário -->
+  <div id="sec-form" style="display:none">
+    <div class="card">
+      <div class="card-header">⭐ Avalie de 1 a 5 estrelas</div>
+      <div class="card-body">
+        <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+
+        <!-- Satisfação geral -->
+        <div class="pergunta">
+          <span class="pergunta-label">😊 Como você avalia sua satisfação geral no trabalho?</span>
+          <div class="estrelas" id="stars-satisfacao"></div>
+          <div class="nota-labels"><span>Muito ruim</span><span>Excelente</span></div>
+          <input type="hidden" id="v-satisfacao" value="0">
+        </div>
+
+        <!-- Liderança -->
+        <div class="pergunta">
+          <span class="pergunta-label">👔 Como avalia a liderança / gestão da empresa?</span>
+          <div class="estrelas" id="stars-lideranca"></div>
+          <div class="nota-labels"><span>Muito ruim</span><span>Excelente</span></div>
+          <input type="hidden" id="v-lideranca" value="0">
+        </div>
+
+        <!-- Comunicação -->
+        <div class="pergunta">
+          <span class="pergunta-label">💬 Como avalia a comunicação interna?</span>
+          <div class="estrelas" id="stars-comunicacao"></div>
+          <div class="nota-labels"><span>Muito ruim</span><span>Excelente</span></div>
+          <input type="hidden" id="v-comunicacao" value="0">
+        </div>
+
+        <!-- Ambiente -->
+        <div class="pergunta">
+          <span class="pergunta-label">🏢 Como avalia o ambiente e as condições de trabalho?</span>
+          <div class="estrelas" id="stars-ambiente"></div>
+          <div class="nota-labels"><span>Muito ruim</span><span>Excelente</span></div>
+          <input type="hidden" id="v-ambiente" value="0">
+        </div>
+
+        <!-- Crescimento -->
+        <div class="pergunta">
+          <span class="pergunta-label">📈 Como avalia as oportunidades de crescimento e desenvolvimento?</span>
+          <div class="estrelas" id="stars-crescimento"></div>
+          <div class="nota-labels"><span>Muito ruim</span><span>Excelente</span></div>
+          <input type="hidden" id="v-crescimento" value="0">
+        </div>
+
+        <!-- Remuneração -->
+        <div class="pergunta">
+          <span class="pergunta-label">💰 Como avalia sua remuneração e benefícios?</span>
+          <div class="estrelas" id="stars-remuneracao"></div>
+          <div class="nota-labels"><span>Muito ruim</span><span>Excelente</span></div>
+          <input type="hidden" id="v-remuneracao" value="0">
+        </div>
+
+        <hr style="border:none;border-top:1px solid var(--gray-100);margin:24px 0">
+
+        <!-- Comentários -->
+        <div class="pergunta">
+          <span class="pergunta-label">💪 O que mais gosta no trabalho? (opcional)</span>
+          <textarea id="v-ponto-forte" rows="2" placeholder="Ex: O ambiente de equipe, a organização..."></textarea>
+        </div>
+
+        <div class="pergunta">
+          <span class="pergunta-label">🔧 O que poderia melhorar? (opcional)</span>
+          <textarea id="v-ponto-melhora" rows="2" placeholder="Ex: Comunicação, horários, infraestrutura..."></textarea>
+        </div>
+
+        <div class="pergunta" style="margin-bottom:0">
+          <span class="pergunta-label">💡 Alguma sugestão para a empresa? (opcional)</span>
+          <textarea id="v-sugestao" rows="2" placeholder="Sua sugestão pode fazer a diferença..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div id="form-alert"></div>
+    <button class="btn-enviar" id="btn-enviar" onclick="enviarResposta()">📤 Enviar resposta</button>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--gray-400)">🔒 Sua resposta é completamente anônima</div>
+  </div>
+
+  <!-- Sucesso -->
+  <div id="sec-sucesso" class="card sucesso">
+    <div class="sucesso-icon">🎉</div>
+    <div class="sucesso-title">Obrigado pela sua resposta!</div>
+    <div class="sucesso-sub">Sua opinião é muito importante para melhorarmos o ambiente de trabalho. Resposta registrada com sucesso!</div>
+  </div>
+
+  <!-- Erro -->
+  <div id="sec-erro" class="card erro-page" style="display:none">
+    <div style="font-size:56px;margin-bottom:16px">❌</div>
+    <div style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:8px" id="err-titulo">Pesquisa não encontrada</div>
+    <div style="font-size:14px;color:var(--gray-400)" id="err-msg">Verifique o link com o RH.</div>
+  </div>
+
+</div>
+
+<script>
+const SB_URL = 'https://souaquyulitejpdzlifx.supabase.co';
+const SB_KEY = 'sb_publishable_JgX7NZR80M3oBrIhpzzeTQ_imNYERm3';
+
+let pesquisaId = null;
+const campos = ['satisfacao','lideranca','comunicacao','ambiente','crescimento','remuneracao'];
+const cores = {1:'#ef4444',2:'#f97316',3:'#f59e0b',4:'#10b981',5:'#14b8a6'};
+const emojis = {1:'😟',2:'😕',3:'😐',4:'😊',5:'😄'};
+
+async function sbGet(table, qs) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}${qs}`, {
+    headers: { apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}` }
+  });
+  return r.ok ? r.json() : [];
+}
+
+async function sbPost(table, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method:'POST',
+    headers: { apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}`, 'Content-Type':'application/json', Prefer:'return=representation' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json().catch(()=>{}); throw new Error(e?.message||'Erro ao salvar'); }
+  return r.json();
+}
+
+function buildStars(campo) {
+  const wrap = document.getElementById('stars-'+campo);
+  for(let i=1;i<=5;i++){
+    const btn = document.createElement('button');
+    btn.type='button'; btn.className='estrela-btn'; btn.id=`s-${campo}-${i}`;
+    btn.innerHTML='☆'; btn.title=`${i} estrela${i>1?'s':''}`;
+    btn.onclick = () => selectStar(campo, i);
+    wrap.appendChild(btn);
+  }
+}
+
+function selectStar(campo, nota) {
+  document.getElementById('v-'+campo).value = nota;
+  const cor = cores[nota]; const emoji = emojis[nota];
+  for(let i=1;i<=5;i++){
+    const btn = document.getElementById(`s-${campo}-${i}`);
+    if(i<=nota){
+      btn.innerHTML='★'; btn.style.background=cor; btn.style.borderColor=cor; btn.style.color='white';
+    } else {
+      btn.innerHTML='☆'; btn.style.background='white'; btn.style.borderColor='var(--gray-200)'; btn.style.color='var(--gray-400)';
+    }
+  }
+  // Atualizar progresso
+  const preenchidos = campos.filter(c=>parseInt(document.getElementById('v-'+c).value)>0).length;
+  document.getElementById('progress').style.width = (preenchidos/campos.length*100)+'%';
+}
+
+async function init() {
+  const params = new URLSearchParams(window.location.search);
+  pesquisaId = params.get('id');
+  if(!pesquisaId){ showErro('Link inválido','Nenhum ID de pesquisa encontrado.'); return; }
+  try{
+    const res = await sbGet('rh_clima_pesquisas',`?id=eq.${pesquisaId}`);
+    const p = res?.[0];
+    if(!p){ showErro('Pesquisa não encontrada','Este link de pesquisa não existe.'); return; }
+    if(p.status==='encerrada'){ showErro('Pesquisa encerrada','Esta pesquisa não está mais aceitando respostas.'); return; }
+    if(p.status==='rascunho'){ showErro('Pesquisa em rascunho','Esta pesquisa ainda não foi publicada.'); return; }
+
+    document.getElementById('hero-titulo').textContent = p.titulo;
+    if(p.descricao) document.getElementById('hero-desc').textContent = p.descricao;
+
+    document.getElementById('sec-loading').style.display = 'none';
+    document.getElementById('sec-form').style.display = '';
+
+    campos.forEach(buildStars);
+  }catch(e){ showErro('Erro de conexão', e.message); }
+}
+
+async function enviarResposta() {
+  const vals = {};
+  for(const c of campos){
+    vals[c] = parseInt(document.getElementById('v-'+c).value)||0;
+    if(!vals[c]){ showErr(`Por favor, avalie o critério "${c}" antes de enviar.`); return; }
+  }
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled=true; btn.textContent='⏳ Enviando...';
+  try{
+    await sbPost('rh_clima_respostas',{
+      pesquisa_id: pesquisaId,
+      satisfacao:  vals.satisfacao,
+      lideranca:   vals.lideranca,
+      comunicacao: vals.comunicacao,
+      ambiente:    vals.ambiente,
+      crescimento: vals.crescimento,
+      remuneracao: vals.remuneracao,
+      ponto_forte:   document.getElementById('v-ponto-forte').value.trim()||null,
+      ponto_melhora: document.getElementById('v-ponto-melhora').value.trim()||null,
+      sugestao:      document.getElementById('v-sugestao').value.trim()||null,
+    });
+    document.getElementById('sec-form').style.display='none';
+    document.getElementById('sec-sucesso').style.display='';
+  }catch(e){
+    showErr('Erro ao enviar: '+e.message);
+    btn.disabled=false; btn.textContent='📤 Enviar resposta';
+  }
+}
+
+function showErr(msg){
+  document.getElementById('form-alert').innerHTML=`<div class="alert alert-error">⚠️ ${msg}</div>`;
+  document.getElementById('form-alert').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function showErro(titulo, msg){
+  document.getElementById('sec-loading').style.display='none';
+  document.getElementById('err-titulo').textContent=titulo;
+  document.getElementById('err-msg').textContent=msg;
+  document.getElementById('sec-erro').style.display='';
+}
+
+init();
+</script>
+</body>
+</html>
